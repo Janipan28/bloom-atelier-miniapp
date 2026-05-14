@@ -4,12 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
+const BOT_USERNAME = "Flowersmessage_Bot";
+
 const NAV = [
   { href: "/admin", label: "Дашборд", icon: "◻" },
   { href: "/admin/products", label: "Товары", icon: "🌸" },
   { href: "/admin/orders", label: "Заказы", icon: "📦" },
   { href: "/admin/promo-codes", label: "Промокоды", icon: "🏷" },
   { href: "/admin/branches", label: "Точки", icon: "📍" },
+  { href: `https://t.me/${BOT_USERNAME}?start=admin`, label: "Посты → в ТГ", icon: "✉️", external: true },
 ];
 
 export function LogoutClient() {
@@ -57,21 +60,35 @@ export function MobileNav() {
               <button type="button" onClick={() => setOpen(false)} className="text-white/60 text-xl">×</button>
             </div>
             <nav className="flex-1 py-4 flex flex-col gap-1 px-3">
-              {NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] transition-colors ${
-                    pathname === item.href
-                      ? "bg-white/15 text-white"
-                      : "text-white/70 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  <span>{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
+              {NAV.map((item) =>
+                item.external ? (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] transition-colors text-white/70 hover:bg-white/10 hover:text-white border border-white/10"
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] transition-colors ${
+                      pathname === item.href
+                        ? "bg-white/15 text-white"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <span>{item.icon}</span>
+                    {item.label}
+                  </Link>
+                )
+              )}
             </nav>
             <div className="px-4 pb-6">
               <button

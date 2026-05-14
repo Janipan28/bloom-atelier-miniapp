@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { PRODUCTS } from "@/lib/mock-data";
+import { readDB } from "@/lib/db";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export function GET() {
-  return NextResponse.json({ products: PRODUCTS });
+  const db = readDB();
+  return NextResponse.json({ products: db.products });
 }

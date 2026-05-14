@@ -1,12 +1,20 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+const BOT_USERNAME = "Flowersmessage_Bot";
+
 const NAV = [
-  { href: "/admin", label: "Дашборд", icon: "◻" },
-  { href: "/admin/products", label: "Товары", icon: "🌸" },
-  { href: "/admin/orders", label: "Заказы", icon: "📦" },
-  { href: "/admin/promo-codes", label: "Промокоды", icon: "🏷" },
-  { href: "/admin/branches", label: "Точки", icon: "📍" },
+  { href: "/admin",              label: "Дашборд",     icon: "◻",  external: false },
+  { href: "/admin/products",     label: "Товары",       icon: "🌸", external: false },
+  { href: "/admin/orders",       label: "Заказы",       icon: "📦", external: false },
+  { href: "/admin/promo-codes",  label: "Промокоды",    icon: "🏷", external: false },
+  { href: "/admin/branches",     label: "Точки",        icon: "📍", external: false },
+  {
+    href: `https://t.me/${BOT_USERNAME}?start=admin`,
+    label: "Посты → в ТГ",
+    icon: "✉️",
+    external: true,
+  },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -19,16 +27,29 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <div className="text-[17px] font-semibold">Админка</div>
         </div>
         <nav className="flex-1 py-4 flex flex-col gap-1 px-3">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] text-white/70 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) =>
+            item.external ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] text-white/70 hover:bg-white/10 hover:text-white transition-colors border border-white/10 mt-1"
+              >
+                <span className="text-base leading-none">{item.icon}</span>
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-[14px] text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <span className="text-base leading-none">{item.icon}</span>
+                {item.label}
+              </Link>
+            )
+          )}
         </nav>
         <div className="px-4 pb-6">
           <LogoutButton />
