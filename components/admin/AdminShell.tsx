@@ -10,6 +10,7 @@ const NAV = [
   { href: "/admin", label: "Дашборд", icon: "◻" },
   { href: "/admin/products", label: "Товары", icon: "🌸" },
   { href: "/admin/orders", label: "Заказы", icon: "📦" },
+  { href: "/admin/customers", label: "Клиенты", icon: "👥" },
   { href: "/admin/promo-codes", label: "Промокоды", icon: "🏷" },
   { href: "/admin/branches", label: "Точки", icon: "📍" },
   { href: `https://t.me/${BOT_USERNAME}?start=admin`, label: "Посты → в ТГ", icon: "✉️", external: true },
