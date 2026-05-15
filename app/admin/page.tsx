@@ -1,20 +1,33 @@
 import Link from "next/link";
 import { readDB } from "@/lib/db";
 import { formatRub } from "@/lib/pricing";
+import fs from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
 
+function getCustomersStats() {
+  const p = path.join(process.cwd(), "data", "customers.json");
+  if (!fs.existsSync(p)) return { total: 0, vip: 0 };
+  const data = JSON.parse(fs.readFileSync(p, "utf-8"));
+  const customers: Array<{ tags?: string }> = data.customers ?? [];
+  return { total: customers.length, vip: customers.filter((c) => c.tags === "vip").length };
+}
+
 export default function AdminDashboard() {
   const db = readDB();
-  const total = db.orders.reduce((s, o) => s + o.total, 0);
-  const pending = db.orders.filter((o) => o.status === "pending" || o.status === "in_progress").length;
+  const webTotal  = db.orders.reduce((s, o) => s + o.total, 0);
+  const pending   = db.orders.filter((o) => o.status === "pending" || o.status === "in_progress").length;
+  const customers = getCustomersStats();
   const recentOrders = [...db.orders].reverse().slice(0, 5);
 
   const stats = [
-    { label: "Товаров", value: db.products.length, href: "/admin/products", color: "bg-rose-50 text-rose-700" },
-    { label: "Заказов", value: db.orders.length, href: "/admin/orders", color: "bg-amber-50 text-amber-700" },
-    { label: "В работе", value: pending, href: "/admin/orders", color: "bg-blue-50 text-blue-700" },
-    { label: "Выручка", value: formatRub(total), href: "/admin/orders", color: "bg-green-50 text-green-700" },
+    { label: "Товаров",   value: db.products.filter((p) => p.stock_status !== "out_of_stock").length, href: "/admin/products",  color: "bg-rose-50 text-rose-700" },
+    { label: "Заказов",   value: db.orders.length,   href: "/admin/orders",    color: "bg-amber-50 text-amber-700" },
+    { label: "В работе",  value: pending,             href: "/admin/orders",    color: "bg-blue-50 text-blue-700" },
+    { label: "Клиентов",  value: customers.total,     href: "/admin/customers", color: "bg-purple-50 text-purple-700" },
+    { label: "VIP",       value: customers.vip,       href: "/admin/customers", color: "bg-pink-50 text-pink-700" },
+    { label: "Выручка",   value: formatRub(webTotal), href: "/admin/orders",    color: "bg-green-50 text-green-700" },
   ];
 
   return (
@@ -22,7 +35,7 @@ export default function AdminDashboard() {
       <h1 className="text-[26px] font-semibold text-[#2F241F] mb-6">Дашборд</h1>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         {stats.map((s) => (
           <Link
             key={s.label}
@@ -44,6 +57,9 @@ export default function AdminDashboard() {
           <Link href="/admin/orders" className="text-[13px] text-[#B24C63]">Все →</Link>
         </div>
         <div className="divide-y divide-[#F0E8DE]">
+          {recentOrders.length === 0 && (
+            <div className="px-5 py-6 text-center text-[13px] text-[#9E8E7E]">Нет заказов</div>
+          )}
           {recentOrders.map((order) => (
             <div key={order.id} className="px-5 py-3 flex items-center gap-4">
               <span className="text-[13px] text-[#6B5B52] w-14">#{order.id}</span>
@@ -58,9 +74,10 @@ export default function AdminDashboard() {
       {/* Quick links */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[
-          { href: "/admin/products/new", label: "Добавить товар", icon: "➕" },
-          { href: "/admin/promo-codes", label: "Промокоды", icon: "🏷" },
-          { href: "/admin/branches", label: "Точки продаж", icon: "📍" },
+          { href: "/admin/products/new", label: "Добавить товар",   icon: "➕" },
+          { href: "/admin/promo-codes",  label: "Промокоды",         icon: "🏷" },
+          { href: "/admin/branches",     label: "Точки продаж",      icon: "📍" },
+          { href: "/admin/customers",    label: "База клиентов",     icon: "👥" },
         ].map((l) => (
           <Link
             key={l.href}
@@ -78,11 +95,11 @@ export default function AdminDashboard() {
 
 function StatusDot({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    pending: "bg-blue-400",
+    pending:     "bg-blue-400",
     in_progress: "bg-amber-400",
-    ready: "bg-purple-400",
-    delivered: "bg-green-400",
-    cancelled: "bg-red-400",
+    ready:       "bg-purple-400",
+    delivered:   "bg-green-400",
+    cancelled:   "bg-red-400",
   };
   return <span className={`w-2 h-2 rounded-full ${colors[status] ?? "bg-gray-400"}`} />;
 }
